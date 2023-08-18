@@ -3,10 +3,10 @@
 #include<stdlib.h>
 
 //Hardcoded variables   ----------------------------------------------------------------------------------------------------------
-#define DATA_PATH "./data/"
-#define INSERE_BIN "insere.bin"
-#define REMOVE_BIN "remove.bin"
-#define DB "data_base.bin"
+
+#define INSERE_BIN "./data/insere.bin"
+#define REMOVE_BIN "./data/remove_reg.bin"
+#define DB_PATH "./data/data_base.bin"
 
 #define CLI_ID_LENGHT 11
 #define CAR_ID_LENGHT 7
@@ -29,10 +29,10 @@ int menu();
 
 
 //  Program 'Main' Functions
-int insert(reg_loc* );
-int remove(char [CLI_ID_LENGHT + CAR_ID_LENGHT + 1]);
-int compact();
-int load();
+int insert_reg(reg_loc* );
+int remove_reg(char [CLI_ID_LENGHT + CAR_ID_LENGHT + 1]);
+int compact_file();
+int load_test();
 
 //  Search Functions
 int by_key(int);
@@ -46,8 +46,8 @@ char* string_field(int);
 int int_field(int);
 
 //  File Handling
-int reg_open(FILE*);
-void reg_close(FILE*);
+int file_open(FILE*);
+void file_close(FILE*);
 
 
 
@@ -64,43 +64,36 @@ int menu(){
     
 }
 
-int insert(reg_loc* reg){
+int insert_reg(reg_loc* reg){
 
 }
 
-int remove(char key[CLI_ID_LENGHT + CAR_ID_LENGHT + 1])
-{
+int remove_reg(char key[CLI_ID_LENGHT + CAR_ID_LENGHT + 1]){
     return 0;
 }
 
-int compact()
-{
+int compact_file(){
     return 0;
 }
 
-int load()
-{
+int load_test(){
     return 0;
 }
 
-int by_key(int key)
-{
+int by_key(int key){
     return 0;
 }
 
-int first_fit()
-{
+int first_fit(){
     return 0;
 }
 
-reg_loc* reg_struct(int offset)
-{
+reg_loc* reg_struct(int offset){
     reg_loc* reg;
     return reg;
 }
 
-reg_loc *new_reg()
-{
+reg_loc* new_reg(){
     reg_loc* reg = (reg_loc*) malloc(sizeof(reg_loc));
 
     reg->size = 0;
@@ -121,13 +114,25 @@ void kill_reg(reg_loc* reg){
     free(reg);
 }
 
-char* string_field(int offset)
-{
+char* string_field(int offset){
     char* str;
     return str;
 }
 
-int int_field(int offset)
-{
+int int_field(int offset){
     return 0;
+}
+
+int file_open(FILE* fp){
+
+    if( (fp = fopen(DB_PATH, "r+")) == NULL ){
+        return 0;
+    }
+    else{
+        return 1;
+    }
+}
+
+void file_close(FILE* fp){
+    return fclose(fp);
 }
