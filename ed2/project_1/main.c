@@ -1,12 +1,17 @@
 //Includes  ----------------------------------------------------------------------------------------------------------
 #include<stdio.h>
 #include<stdlib.h>
+#include<time.h>
 
 //Hardcoded variables   ----------------------------------------------------------------------------------------------------------
 
 #define INSERE_BIN "./data/insere.bin"
 #define REMOVE_BIN "./data/remove_reg.bin"
 #define DB_PATH "./data/data_base.bin"
+
+#define INSERE_BIN_WIN "\\data\\insere.bin"
+#define REMOVE_BIN_WIN "\\data\\remove_reg.bin"
+#define DB_PATH_WIN "\\data\\data_base.bin"
 
 #define CLI_ID_LENGHT 11
 #define CAR_ID_LENGHT 7
@@ -25,7 +30,8 @@ typedef struct Rent{
 //Functions declarations    ----------------------------------------------------------------------------------------------------------
 
 //  Menu Function
-int menu();
+int menu_wrp();
+int menu(unsigned short int );
 
 
 //  Program 'Main' Functions
@@ -33,6 +39,11 @@ int insert_reg(reg_loc* );
 int remove_reg(char [CLI_ID_LENGHT + CAR_ID_LENGHT + 1]);
 int compact_file();
 int load_test();
+//      Wrappers
+int insert_reg_wrp();
+int remove_reg_wrp();
+int compact_file_wrp();
+int load_test_wrp();
 
 //  Search Functions
 int by_key(int);
@@ -49,19 +60,61 @@ int int_field(int);
 int file_open(FILE*);
 void file_close(FILE*);
 
+//OS Handling
+void console_clear();
+void wait_for(unsigned int);
+
 
 
 //Main  ----------------------------------------------------------------------------------------------------------
 int main(){
-    menu();
+    menu_wrp();
 
     return 0;
 }
 
 
 //Functions ----------------------------------------------------------------------------------------------------------
-int menu(){
+int menu_wrp(){
+    unsigned short int sys_os = 0;
+    #ifdef _WIN32
+        sys_os = 1;
+    #elif _WIN64
+        sys_os = 2;
+    #elif __linux__
+        sys_os = 10;
+    #endif
+
+    if(sys_os == 1 || sys_os == 2)
+        printf("OS: WINDOWS\n");
+    else if(sys_os == 10){
+        printf("OS: LINUX\n");
+    }
+    else
+        printf("OS: UNDEFINED\n");
+
+    printf("PROJECT_1: START");
+
+    wait_for(1);
+    console_clear();
+    //while (menu(sys_os) > 1);
     
+}
+
+int menu(unsigned short int sys_os){
+    unsigned short int cmd = 0;
+
+    printf("Project 1\n\t1.Insert\n\t2.Remove\n\t3.Compact\n\t4.Load Test File\n\t5.Exit");
+    
+    switch (cmd)
+    {
+    case 1:
+        insert_reg_wrp();
+        break;
+    
+    default:
+        break;
+    }
 }
 
 int insert_reg(reg_loc* reg){
@@ -78,6 +131,27 @@ int compact_file(){
 
 int load_test(){
     return 0;
+}
+
+int insert_reg_wrp(){
+    
+    console_clear();
+
+
+    
+
+}
+
+int remove_reg_wrp(){
+
+}
+
+int compact_file_wrp(){
+
+}
+
+int load_test_wrp(){
+
 }
 
 int by_key(int key){
@@ -134,5 +208,22 @@ int file_open(FILE* fp){
 }
 
 void file_close(FILE* fp){
-    return fclose(fp);
+    fclose(fp);
+}
+
+void console_clear(){
+    #ifdef __linux__
+        system("clear");
+    #elif _WIN32
+        system("cls");
+    #elif _WIN64
+        system("cls");
+    #endif
+}
+
+void wait_for(unsigned int wait){
+    unsigned int end_time = time(0) + wait;
+    while(time(0) < end_time);
+
+    return;
 }
