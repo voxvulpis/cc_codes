@@ -3,6 +3,7 @@
 #include<stdlib.h>
 #include<time.h>
 #include<string.h>
+#include<unistd.h>
 
 //Hardcoded variables   ----------------------------------------------------------------------------------------------------------
 
@@ -133,26 +134,26 @@ int menu(){
     switch (cmd)
     {
     case '1':
-        return insert_reg_wrp();
+        insert_reg_wrp();
         break;
 
     case '2':
-        return remove_reg_wrp();
+        remove_reg_wrp();
         break;
 
     case '3':
-        return compact_file_wrp();
+        compact_file_wrp();
         break;
 
     case '4':
-        return load_test_wrp();
+        load_test_wrp();
         break;
 
     case '5':
         return 2;
     
     default:
-        return 1;
+        return 0;
         break;
     }
 }
@@ -167,7 +168,10 @@ int insert_reg(reg_loc* reg, int offset){
     char flg = '*';
 
     file_open(&fp);
-    fseek(fp, offset, SEEK_SET);
+    if(offset != -1)
+        fseek(fp, offset, SEEK_SET);
+    else
+        fseek(fp, 0, SEEK_END);
     fread(&rest, sizeof(int), 1, fp);
     rest -= size;
 
@@ -268,38 +272,51 @@ int load_test(){
 }
 
 int insert_reg_wrp(){
+    char buff[50];
     reg_loc* reg = new_reg();
     
     console_clear();
+    getc(stdin);
     printf("Input Client Code: ");
     // input_clear();
     fflush(stdin);
-    fgets(reg->cli_id, CLI_ID_LENGHT, stdin);
+    fgets(buff, 12, stdin);
+    strcpy(reg->cli_id, buff);
 
+
+    getc(stdin);
     printf("Input Car Code: ");
     // input_clear();
-    fgets(reg->car_id, CAR_ID_LENGHT, stdin);
+    fflush(stdin);
+    fgets(buff, 8, stdin);
+    strcpy(reg->car_id, buff);
 
     //Searches for existent primary key
-    if(by_key(reg->cli_id, reg->car_id) >= 0){
+    if(by_key(reg->cli_id, reg->car_id) > 0){
         kill_reg(reg);
         printf("Duplicated Primary Key");
         return 1;
     }
 
+    getc(stdin);
     printf("Input Client Name: ");
     // input_clear();
-    fgets(reg->cli_name, NAME_LENGHT, stdin);
+    fflush(stdin);
+    fgets(buff, 50, stdin);
+    strcpy(reg->cli_name, buff);
 
+    getc(stdin);
     printf("Input Car Name: ");
     // input_clear();
-    fgets(reg->car_name, NAME_LENGHT, stdin);
+    fflush(stdin);
+    fgets(buff, 50, stdin);
+    strcpy(reg->car_name, buff);
 
+    getc(stdin);
     printf("Input the Number of Days: ");
     // input_clear();
-    scanf(" %i", reg->days_rent);
+    scanf(" %i", &reg->days_rent);
 
-    printf("Test");
     insert_reg(reg, first_fit(6 + CLI_ID_LENGHT + CAR_ID_LENGHT + strlen(reg->cli_name) + strlen(reg->car_name) + 1));
 
 
@@ -349,12 +366,12 @@ int load_test_wrp(){
 int by_key(char* cli_id, char* car_id){
     FILE* fp;
     int offset = 0;
-    int total_offset = 1;
+    int total_offset = sizeof(int);
+    char buff[50];
     char empty = '.';
-    reg_loc* reg;
+    reg_loc* reg = new_reg();
 
     file_open(&fp);
-    new_reg(reg);
 
     if(is_empty(fp))
         return 0;
@@ -377,13 +394,21 @@ int by_key(char* cli_id, char* car_id){
             fseek(fp, total_offset, SEEK_SET);
             
             fread(&offset, sizeof(int), 1, fp);
-            fread(reg->cli_id, sizeof(char), CLI_ID_LENGHT, fp);
+
+            fread(buff, CLI_ID_LENGHT, 1, fp);
+            buff[CLI_ID_LENGHT] = 0;
+            strcpy(reg->cli_id, buff);
+            // fgets(reg->cli_id, 12, fp);
             fgetc(fp);
-            fread(reg->car_id, sizeof(char), CAR_ID_LENGHT, fp);
+            fread(buff, CAR_ID_LENGHT, 1, fp);
+            buff[CAR_ID_LENGHT] = 0;
+            strcpy(reg->car_id, buff);
             fgetc(fp);
 
-            reg->cli_id[CLI_ID_LENGHT] = '\0';
-            reg->car_id[CAR_ID_LENGHT] = '\0';
+            
+            
+            cli_id[CLI_ID_LENGHT] = 0;
+            car_id[CAR_ID_LENGHT] = 0;
 
             if(strcmp(cli_id, reg->cli_id) == 0 && strcmp(car_id, reg->car_id) == 0){
                 kill_reg(reg);
@@ -427,7 +452,10 @@ int first_fit(int size){
         fread(&offset, sizeof(int), 1, fp);
         
     }
+
     
+    
+
 
 
     file_close(&fp);
@@ -437,10 +465,10 @@ int first_fit(int size){
 int is_empty(FILE* fp){
     int offset = 0;
 
-    fseek(fp, 1, SEEK_SET);
+    fseek(fp, sizeof(int), SEEK_SET);
     fread(&offset, sizeof(int), 1, fp);
 
-    if(offset){
+    if(offset > 0){
         return 0;
     }
     
@@ -541,13 +569,17 @@ int file_open(FILE** fp){
 
 int create_file(){
     FILE* fp;
-    int insert[] = {-1, 0};
+    int insert[] = {-1, -1};
 
     if(op_sys() == 10){
         // fp = fopen(DB_PATH, "wb");
         if( (fp = fopen(DB_PATH, "wb")) != NULL ){
             printf("CREATE FILE\n");
             fwrite(insert, sizeof(int), sizeof(insert), fp);
+            fseek(fp, 8, SEEK_SET);
+            
+
+
             file_close(&fp);
             return 0;
         }
@@ -589,7 +621,7 @@ void wait_for(unsigned int wait){
 }
 
 void input_clear(){
-    scanf("%*[^\n]%1*[\n]");
+    // scanf("%*[^\n]%1*[\n]");
 }
 
 unsigned short int op_sys(){
